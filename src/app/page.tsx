@@ -307,7 +307,7 @@ export default function WellnessQuiz() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
-    const finalAnswers = { ...answers, email }
+    const finalAnswers: Record<string, any> = { ...answers, email }
 
     const nameParts = name.trim().split(' ')
     const firstName = nameParts[0] ?? ''
