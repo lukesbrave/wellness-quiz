@@ -154,7 +154,7 @@ const QUESTIONS: Question[] = [
     id: 'email',
     type: 'email',
     question: 'Where should we send your personalised results?',
-    subtitle: 'Enter your email to receive your wellness profile and recommendations',
+    subtitle: 'Enter your details to receive your personalised wellness profile and recommendations',
   },
 ]
 
@@ -163,7 +163,9 @@ export default function WellnessQuiz() {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, any>>({})
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [isComplete, setIsComplete] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedMulti, setSelectedMulti] = useState<string[]>([])
 
   const question = QUESTIONS[currentStep]
@@ -246,6 +248,27 @@ export default function WellnessQuiz() {
     )
   }
 
+  // Map answer IDs back to human-readable labels
+  const getLabel = (questionId: string, answerId: string): string => {
+    const q = QUESTIONS.find(q => q.id === questionId)
+    const opt = q?.options?.find(o => o.id === answerId)
+    return opt?.label ?? answerId
+  }
+
+  const getLabels = (questionId: string, answerIds: string[]): string => {
+    return answerIds.map(id => getLabel(questionId, id)).join(', ')
+  }
+
+  const calcProfile = (ans: Record<string, any>): string => {
+    const energy = ans['daily-energy']
+    const obstacle = ans['consistency-obstacle']
+    if (energy === 'fumes' || energy === 'behind') return 'The Exhausted Achiever'
+    if (energy === 'crash') return 'The Morning-Crash Cycle'
+    if (obstacle === 'overwhelm' || obstacle === 'willpower') return 'The Overwhelmed Starter'
+    if (obstacle === 'family') return 'The Sandwich Generation Warrior'
+    return 'The Awakening'
+  }
+
   const handleAnswer = (answer: any) => {
     setAnswers(prev => ({ ...prev, [question.id]: answer }))
     
@@ -282,10 +305,51 @@ export default function WellnessQuiz() {
     }
   }
 
-  const handleSubmit = () => {
-    setAnswers(prev => ({ ...prev, email }))
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    const finalAnswers = { ...answers, email }
+
+    const nameParts = name.trim().split(' ')
+    const firstName = nameParts[0] ?? ''
+    const lastName = nameParts.slice(1).join(' ')
+
+    const urgency: number = finalAnswers['burnout-urgency'] ?? 5
+    const commitment: number = finalAnswers['commitment'] ?? 5
+
+    const payload = {
+      // Contact info
+      email,
+      full_name: name.trim(),
+      firstName,
+      lastName,
+      // Quiz answers mapped to GHL field keys
+      daily_energy: getLabel('daily-energy', finalAnswers['daily-energy']),
+      consistency_obstacle: getLabel('consistency-obstacle', finalAnswers['consistency-obstacle']),
+      current_symptoms: getLabels('symptoms', finalAnswers['symptoms'] ?? []),
+      health_objective: getLabel('health-objective', finalAnswers['health-objective']),
+      body_mind_rebuild_goals: getLabels('body-mind-rebuild', finalAnswers['body-mind-rebuild'] ?? []),
+      burnout_urgency_score: urgency,
+      readiness_to_implement: getLabel('readiness', finalAnswers['readiness']),
+      ideal_future_12_months: getLabel('ideal-future', finalAnswers['ideal-future']),
+      success_metric: getLabel('success-metric', finalAnswers['success-metric']),
+      commitment_score: commitment,
+      quiz_profile: calcProfile(finalAnswers),
+      quiz_readiness_score: Math.round((urgency + commitment) / 2),
+    }
+
+    try {
+      await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+    } catch (err) {
+      console.error('Webhook error:', err)
+    }
+
+    setAnswers(finalAnswers)
+    setIsSubmitting(false)
     setIsComplete(true)
-    console.log('Quiz completed:', { ...answers, email })
   }
 
   // Results page
@@ -432,6 +496,13 @@ export default function WellnessQuiz() {
                 {question.type === 'email' && (
                   <div className="space-y-4">
                     <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your full name"
+                      className="w-full px-6 py-4 rounded-2xl border-2 border-gray-200 text-lg text-center focus:outline-none focus:border-gray-400"
+                    />
+                    <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -440,14 +511,14 @@ export default function WellnessQuiz() {
                     />
                     <button
                       onClick={handleSubmit}
-                      disabled={!email || !email.includes('@')}
+                      disabled={!email || !email.includes('@') || !name.trim() || isSubmitting}
                       className={`w-full py-4 rounded-2xl font-semibold transition-all ${
-                        email && email.includes('@')
+                        email && email.includes('@') && name.trim() && !isSubmitting
                           ? 'bg-gray-800 text-white hover:bg-gray-700'
                           : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      See My Results
+                      {isSubmitting ? 'Sending...' : 'See My Results'}
                     </button>
                     <p className="text-sm text-gray-400">
                       We respect your privacy. Unsubscribe anytime.
