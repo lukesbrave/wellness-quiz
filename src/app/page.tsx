@@ -215,7 +215,7 @@ export default function WellnessQuiz() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <p className="text-gray-700 leading-relaxed">Which of the 4 wellness pillars is quietly sabotaging everything else</p>
+                  <p className="text-gray-700 leading-relaxed">Which burnout archetype is quietly sabotaging everything else</p>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
