@@ -194,7 +194,7 @@ export default function WellnessQuiz() {
 
             {/* Subheadline */}
             <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
-              Answer 10 honest questions and walk away with a personalised breakdown of what's draining you, why it's happening, and the exact shift that will get you unstuck.
+              Answer a few questions about where you're at right now and get a personalised breakdown of exactly what's draining you, why the stop-start cycle keeps winning, and what your path out actually looks like.
             </p>
 
             {/* What You'll Get */}
