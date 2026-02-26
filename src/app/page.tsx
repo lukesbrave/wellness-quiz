@@ -188,7 +188,7 @@ export default function WellnessQuiz() {
             </div>
 
             {/* Headline */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-gray-900 mb-6 leading-tight max-w-xl mx-auto">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-gray-900 mb-6 leading-tight max-w-xl mx-auto">
               How Many More Years Will You Spend Feeling Like This?
             </h1>
 
