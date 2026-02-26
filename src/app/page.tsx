@@ -325,9 +325,9 @@ export default function WellnessQuiz() {
       // Quiz answers mapped to GHL field keys
       daily_energy: getLabel('daily-energy', finalAnswers['daily-energy']),
       consistency_obstacle: getLabel('consistency-obstacle', finalAnswers['consistency-obstacle']),
-      current_symptoms: getLabels('symptoms', finalAnswers['symptoms'] ?? []),
+      current_symptoms: (finalAnswers['symptoms'] ?? []).map((id: string) => getLabel('symptoms', id)),
       health_objective: getLabel('health-objective', finalAnswers['health-objective']),
-      body_mind_rebuild_goals: getLabels('body-mind-rebuild', finalAnswers['body-mind-rebuild'] ?? []),
+      body_mind_rebuild_goals: (finalAnswers['body-mind-rebuild'] ?? []).map((id: string) => getLabel('body-mind-rebuild', id)),
       burnout_urgency_score: urgency,
       readiness_to_implement: getLabel('readiness', finalAnswers['readiness']),
       ideal_future_12_months: getLabel('ideal-future', finalAnswers['ideal-future']),
